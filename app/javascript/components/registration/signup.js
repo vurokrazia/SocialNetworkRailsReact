@@ -6,33 +6,41 @@ import RaisedButton from 'material-ui/RaisedButton';
 import { Base,styles } from './base';
 import reqwest from 'reqwest';
 
-export class Login extends Base{
-    submit(){
-        reqwest({
-            url: '/users/sign_in.json',
-            method: 'POST',
-            data:{
-                user:{
-                    email: this.state.email,
-                    password: this.state.password
-                }
-            },
-            headers:{
-                'X-CSRF-Token':document.querySelector('meta[name="csrf-token"]').content
-            }
-        }).then(data =>{
-            console.log(data);
-            this.reload();
-        }).catch(err => this.handleError(err));
-
-    }
+export class SignUp extends Base{
+	submit(){
+        if(this.syncConfirmPassword()){
+    		reqwest({
+    			url: '/users.json',
+    			method: 'POST',
+    			data:{
+    				user:{
+    					email: this.state.email,
+    					password: this.state.password,
+    					passwordConfirmation: this.state.passwordConfirmation
+    				}
+    			},
+    			headers:{
+    				'X-CSRF-Token':document.querySelector('meta[name="csrf-token"]').content
+    			}
+    		}).then(data =>{
+    			console.log(data);
+                this.reload();
+    		}).catch(err => this.handleError(err));
+        }
+	}
     handleError(err){
-        const errorMessage = JSON.parse(err.response).error;
+        console.log(err);
+        const jsonError = JSON.parse(err.response);
+        const errors = jsonError.errors;
+        let errorsResponse = [];
+        for(let key in errors){
+            errorsResponse.push(<li>{errors[key]}</li>)
+        }
         this.setState({
-            error: errorMessage
+            error: errorsResponse
         })
     }
-    render(){
+	render(){
         return (
             <MuiThemeProvider>
                 <Formsy.Form 
@@ -41,7 +49,7 @@ export class Login extends Base{
                     onValidSubmit={()=> this.submit()}
                     >
                     <div>
-                        {this.state.error}
+                        <ul>{this.state.error}</ul>
                     </div>
                     <div>
                         <FormsyText
@@ -65,19 +73,28 @@ export class Login extends Base{
                             floatingLabelText="Contraseña"  />
                     </div>
                     <div>
+                        <FormsyText
+                            floatingLabelFocusStyle={styles.floatingLabelFocusStyle}
+                            underlineFocusStyle={styles.underlineStyle}
+                            onChange={
+                                (e)=>this.syncField(e,"passwordConfirmation")
+                            }
+                            name="passwordConfirmation" 
+                            required 
+                            type="password"
+                            floatingLabelText="Confirmar contraseña"  />
+                    </div>
+                    <div>
                         <RaisedButton
                             style={styles.buttontop}
                             backgroundColor={styles.buttonColor.color}
                             labelColor={styles.labelColor.color}
                             disabled={!this.state.canSubmit}
                             type="submit"
-                            label="Iniciar Sesion" />
-                        <a href='#' 
-                            style={styles.leftSpace}
-                            onClick={this.props.toggle}
-                            >
-                            Ya tengo cuenta
-                        </a>
+                            label="Crear cuenta" />
+                        <a href='#'                 
+							onClick={this.props.toggle}
+							style={styles.leftSpace}>Ya tengo cuenta</a>
                     </div>
                 </Formsy.Form>
             </MuiThemeProvider>
