@@ -9,6 +9,7 @@ gem "haml-rails", "~> 1.0"
 gem 'webpacker-react', "~> 0.2.0"
 gem 'devise', '~> 4.5.0'
 gem 'sass-material-colors'
+gem 'paperclip',"~> 5.0.0"
 # Bundle edge Rails instead: gem 'rails', github: 'rails/rails'
 gem 'rails', '~> 5.1.6'
 # Use sqlite3 as the database for Active Record
